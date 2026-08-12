@@ -29,6 +29,8 @@ export default function App() {
   const [repeatMode, setRepeatMode] = useState('off');
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(70);
+  const [showClientIdDialog, setShowClientIdDialog] = useState(false);
+  const [clientIdInput, setClientIdInput] = useState('');
   const tokenRef = useRef(null);
   const playerRef = useRef(null);
 
@@ -71,9 +73,8 @@ export default function App() {
     try {
       if (!tokenRef.current) {
         if (!hasSpotifyClientId()) {
-          const clientId = window.prompt('Paste the Spotify Client ID from your Spotify Developer Dashboard. It is saved only on this computer.');
-          if (!clientId) return;
-          saveSpotifyClientId(clientId);
+          setShowClientIdDialog(true);
+          return;
         }
         return startSpotifyLogin();
       }
@@ -107,6 +108,14 @@ export default function App() {
   const toggleMute = async () => { const nextMuted = !muted; setMuted(nextMuted); if (playerRef.current) await playerRef.current.setVolume(nextMuted ? 0 : volume / 100); };
   const changeVolume = async (event) => { const nextVolume = Number(event.target.value); setVolume(nextVolume); setMuted(nextVolume === 0); if (playerRef.current) await playerRef.current.setVolume(nextVolume / 100); };
   const choosePage = (page) => { setActivePage(page); setStatus(page === 'Now playing' ? (tokenRef.current ? 'Spotify connected' : 'Demo mode â€” controls use the built-in queue') : `${page} selected`); };
+  const submitClientId = async (event) => {
+    event.preventDefault();
+    if (!clientIdInput.trim()) return;
+    saveSpotifyClientId(clientIdInput);
+    setClientIdInput('');
+    setShowClientIdDialog(false);
+    await startSpotifyLogin();
+  };
 
   if (mini) return <main className="mini-shell"><SoftAurora active={isPlaying} /><section className="mini-player">
     <img src={track.art} alt="" className="mini-art" /><div className="mini-copy"><span className="mini-kicker">NOW PLAYING</span><strong>{track.title}</strong><span>{track.artist}</span></div><SoundWave active={isPlaying} compact />
@@ -124,5 +133,6 @@ export default function App() {
       </section></div>
       <footer><div><span className="live-dot" /> Ambient playback visual</div><button className="queue-button" onClick={() => choosePage('Your library')}><ListMusic size={17} /> Queue <ChevronLeft size={17} /><ChevronRight size={17} /></button></footer>
     </section>
+    {showClientIdDialog && <div className="dialog-backdrop" role="presentation"><form className="client-id-dialog" onSubmit={submitClientId} aria-labelledby="client-id-title"><button type="button" className="dialog-close" onClick={() => setShowClientIdDialog(false)} aria-label="Close">Ã—</button><span className="eyebrow">ONE-TIME SETUP</span><h2 id="client-id-title">Connect Spotify</h2><p>Paste your Spotify <strong>Client ID</strong>. It is saved only on this computer â€” never enter your Client Secret.</p><input autoFocus value={clientIdInput} onChange={(event) => setClientIdInput(event.target.value)} placeholder="Spotify Client ID" aria-label="Spotify Client ID" /><button className="connect" type="submit">Continue to Spotify</button><small>Dashboard â†’ Your app â†’ Settings â†’ Client ID</small></form></div>}
   </main>;
 }
