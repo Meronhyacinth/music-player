@@ -76,7 +76,9 @@ export default function App() {
           setShowClientIdDialog(true);
           return;
         }
-        return startSpotifyLogin();
+        await startSpotifyLogin();
+        setStatus('Spotify authorization opened in your browser');
+        return;
       }
       if (playerRef.current) return setStatus('Spotify playback is already enabled');
       const Spotify = await loadWebPlaybackSdk();
@@ -114,7 +116,10 @@ export default function App() {
     saveSpotifyClientId(clientIdInput);
     setClientIdInput('');
     setShowClientIdDialog(false);
-    await startSpotifyLogin();
+    try {
+      await startSpotifyLogin();
+      setStatus('Spotify authorization opened in your browser');
+    } catch (error) { setStatus(error.message); }
   };
 
   if (mini) return <main className="mini-shell"><SoftAurora active={isPlaying} /><section className="mini-player">
