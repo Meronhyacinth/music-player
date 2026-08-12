@@ -36,7 +36,7 @@ export async function startSpotifyLogin() {
     code_challenge: base64url(await sha256(verifier)),
   });
   const url = `${AUTHORIZE_URL}?${query}`;
-  if (window.musicPlayer?.isDesktop) window.musicPlayer.openExternal(url);
+  if (window.musicPlayer?.isDesktop) await window.musicPlayer.openSpotifyAuthorization(url);
   else window.location.assign(url);
 }
 
