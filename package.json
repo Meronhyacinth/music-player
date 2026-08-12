@@ -1,0 +1,53 @@
+{
+  "name": "music-player",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A desktop Spotify music player with ambient wave effects.",
+  "author": "Meronhyacinth",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:desktop": "concurrently -k \"vite\" \"wait-on http://127.0.0.1:5173 && electron . http://127.0.0.1:5173\"",
+    "build": "vite",
+    "preview": "vite preview",
+    "build:win": "vite build && electron-builder --win nsis"
+  },
+  "dependencies": {
+    "animejs": "^4.2.2",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.12",
+    "vite": "^6.0.5"
+  },
+  "main": "electron/main.cjs",
+  "build": {
+    "appId": "com.meronhyacinth.musicplayer",
+    "productName": "Music Player",
+    "asar": true,
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": ["nsis"],
+      "artifactName": "Music-Player-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "protocols": [{
+      "name": "Music Player Spotify Login",
+      "schemes": ["music-player"]
+    }]
+  }
+}
