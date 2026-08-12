@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell } = require('electron');
+const { app, BrowserWindow, shell, ipcMain } = require('electron');
 const path = require('path');
 
 let mainWindow;
@@ -49,6 +49,13 @@ function createWindow() {
 
 app.whenReady().then(() => {
   app.setAsDefaultProtocolClient('music-player');
+  ipcMain.handle('open-spotify-authorization', async (_event, url) => {
+    const parsed = new URL(url);
+    if (parsed.origin !== 'https://accounts.spotify.com' || parsed.pathname !== '/authorize') {
+      throw new Error('Only Spotify authorization links may be opened from Music Player.');
+    }
+    await shell.openExternal(url);
+  });
   createWindow();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
